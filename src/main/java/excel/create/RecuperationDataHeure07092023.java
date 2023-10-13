@@ -5,14 +5,14 @@ import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Calendar;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class RecuperationDataHeure07092023 {
 
@@ -225,16 +225,27 @@ public class RecuperationDataHeure07092023 {
     // Fonction pour créer ou mettre à jour le fichier suivi_global 
     private static void createOrUpdateFile(String nom_fichier) {
         try {
+            // Créez un nouveau classeur Excel
+            Workbook workbook = new XSSFWorkbook();
 
-            // Crée un objet File pour le fichier "data.csv"
-            File file = new File(nom_fichier + ".csv");
+            // Créez une feuille de calcul dans le classeur
+            Sheet sheet = workbook.createSheet("Données");
 
-            // Vérifie si le fichier n'existe pas, alors le crée
-            if (!file.exists()) {
-                file.createNewFile();
-            }
+            // Écrivez les en-têtes
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("Date");
+            headerRow.createCell(1).setCellValue("Heure");
+            headerRow.createCell(2).setCellValue("Voiture");
+            headerRow.createCell(3).setCellValue("Paramètre");
+
+            // Enregistrez le classeur dans un fichier
+            FileOutputStream fileOut = new FileOutputStream(nom_fichier + ".xlsx");
+            workbook.write(fileOut);
+            fileOut.close();
+
+            // Fermez le classeur
+            workbook.close();
         } catch (IOException e) {
-            // Gère les erreurs liées à la création/mise à jour du fichier
             System.out.println("File creation/update error: " + e);
         }
     }
@@ -242,27 +253,36 @@ public class RecuperationDataHeure07092023 {
     // Fonction pour ajouter les paramètres au fichier suivi
     private static void appendToFile(String timestamp, String[] parameters, int voitures, String nom_fichier) {
         try {
-
-            // Obtenez la date du jour au format "yyyy-MM-dd"
-            SimpleDateFormat dateSdf = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
-            String currentDate = dateSdf.format(new Date());
-
-            // Crée un objet FileWriter pour écrire dans le fichier "data.csv"
-            FileWriter fileWriter = new FileWriter(nom_fichier + ".csv", true);  // 'true' pour ajouter à la fin du fichier
-
-            // Crée un objet BufferedWriter pour une écriture plus efficace
-            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
-            // Parcourt les paramètres et les ajoute au fichier + l'heure
-            bufferedWriter.write(currentDate + "," + timestamp + "," + "voiture n" + voitures + "," + parameters[1] + "\n");
-
-            // Ferme le BufferedWriter
-            bufferedWriter.close();
-        } catch (IOException e) {
-
-            // Gère les erreurs liées à l'ajout de paramètres au fichier
-            System.out.println("File append error: " + e);
-        }
+                // Ouvrez le classeur existant
+                FileInputStream fileIn = new FileInputStream(nom_fichier + ".xlsx");
+                Workbook workbook = WorkbookFactory.create(fileIn);
+                fileIn.close();
+        
+                // Accédez à la feuille de calcul
+                Sheet sheet = workbook.getSheetAt(0);
+        
+                // Trouvez la dernière ligne occupée
+                int rowCount = sheet.getPhysicalNumberOfRows();
+        
+                // Créez une nouvelle ligne
+                Row row = sheet.createRow(rowCount);
+        
+                // Remplissez les cellules
+                row.createCell(0).setCellValue("Date ici");
+                row.createCell(1).setCellValue(timestamp);
+                row.createCell(2).setCellValue("Voiture n°" + voitures);
+                row.createCell(3).setCellValue(parameters[1]);
+        
+                // Enregistrez le classeur dans le même fichier
+                FileOutputStream fileOut = new FileOutputStream(nom_fichier + ".xlsx");
+                workbook.write(fileOut);
+                fileOut.close();
+        
+                // Fermez le classeur
+                workbook.close();
+            } catch (IOException e) {
+                System.out.println("File append error: " + e);
+            }
     }
 
     // Fonction pour obtenir l'heure actuelle au format "HH:mm:ss"
