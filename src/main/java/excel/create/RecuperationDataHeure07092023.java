@@ -71,7 +71,7 @@ public class RecuperationDataHeure07092023 {
 
                     // Obtient l'heure actuelle
                     String timestamp = getCurrentTimestamp();
-
+                    String Date = getCurrentDate();
                     // Affiche chaque paramètre
                     for (int i = 1; i < parameters.length; i++) {
                         System.out.println(timestamp + " : " + parameters[i]);
@@ -93,7 +93,7 @@ public class RecuperationDataHeure07092023 {
                     int num_voitures = copierDerniersFichiers(sourceDirectoryPathA, sourceDirectoryPathB, destinationDirectoryPath);
 
                     // Appel de la fonction pour ajouter les paramètres au fichier
-                    appendToFile(timestamp, parameters, num_voitures, globalfilename);
+                    appendToFile(Date,timestamp, parameters, num_voitures, globalfilename);
 
 
                 }
@@ -236,8 +236,8 @@ public class RecuperationDataHeure07092023 {
             headerRow.createCell(0).setCellValue("Date");
             headerRow.createCell(1).setCellValue("Heure");
             headerRow.createCell(2).setCellValue("Voiture");
-            headerRow.createCell(3).setCellValue("Paramètre");
-
+            headerRow.createCell(3).setCellValue("Résultat IV3 gauche");
+            headerRow.createCell(4).setCellValue("Résultat IV3 droite");
             // Enregistrez le classeur dans un fichier
             FileOutputStream fileOut = new FileOutputStream(nom_fichier + ".xlsx");
             workbook.write(fileOut);
@@ -251,7 +251,7 @@ public class RecuperationDataHeure07092023 {
     }
 
     // Fonction pour ajouter les paramètres au fichier suivi
-    private static void appendToFile(String timestamp, String[] parameters, int voitures, String nom_fichier) {
+    private static void appendToFile(String Date ,String timestamp, String[] parameters, int voitures, String nom_fichier) {
         try {
                 // Ouvrez le classeur existant
                 FileInputStream fileIn = new FileInputStream(nom_fichier + ".xlsx");
@@ -268,7 +268,7 @@ public class RecuperationDataHeure07092023 {
                 Row row = sheet.createRow(rowCount);
         
                 // Remplissez les cellules
-                row.createCell(0).setCellValue("Date ici");
+                row.createCell(0).setCellValue(Date);
                 row.createCell(1).setCellValue(timestamp);
                 row.createCell(2).setCellValue("Voiture n°" + voitures);
                 row.createCell(3).setCellValue(parameters[1]);
@@ -297,6 +297,13 @@ public class RecuperationDataHeure07092023 {
         // Formatez l'heure au format "HH:mm:ss"
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         return sdf.format(calendar.getTime());
+    }
+
+    //Fonction pour obtenir la date actuelle 
+    private static String getCurrentDate(){
+        SimpleDateFormat dateSdf = new SimpleDateFormat("dd-MM-yyyy",Locale.getDefault());
+        String currentDate = dateSdf.format(new Date());
+        return currentDate;
     }
 
     // Fonction pour obtenir la taille du répertoire source
